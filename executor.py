@@ -3,6 +3,7 @@
 __author__ = 'xiaotian.wu@chinacache.com'
 
 import os
+import socket
 import sys
 import threading
 
@@ -35,5 +36,6 @@ class DockerExecutor(mesos.interface.Executor):
     driver.sendFrameworkMessage(message)
 
 if __name__ == "__main__":
-    driver = mesos.native.MesosExecutorDriver(DockerExecutor())
-    sys.exit(0 if driver.run() == mesos_pb2.DRIVER_STOPPED else 1)
+  os.environ["LIBPROCESS_IP"] = socket.gethostbyname(socket.gethostname())
+  driver = mesos.native.MesosExecutorDriver(DockerExecutor())
+  sys.exit(0 if driver.run() == mesos_pb2.DRIVER_STOPPED else 1)
