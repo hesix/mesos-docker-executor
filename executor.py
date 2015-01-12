@@ -18,14 +18,14 @@ class DockerExecutor(mesos.interface.Executor):
       ret = os.system(command)
       update = mesos_pb2.TaskStatus()
       update.task_id.value = task.task_id.value
-      update.message = ret
+      update.message = "task finished, return message: %s" % ret
       if ret == 0:
         update.state = mesos_pb2.TASK_FINISHED
       elif ret == 9:
         update.state = mesos_pb2.TASK_KILLED
       else:
         update.state = mesos_pb2.TASK_FAILED
-      print("task finished, return message: %s" % update.message)
+      print update.message
       driver.sendStatusUpdate(update)
 
     print("running task %s, command: %s" % (task.task_id.value, task.data))
