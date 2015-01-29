@@ -18,7 +18,7 @@ RUN easy_install mesos-0.21.0-py2.7-linux-x86_64.egg
 RUN yum install -y git
 RUN yum install -y subversion-devel
 
-COPY . /mesos-docker-executor
+ADD . /mesos-docker-executor
 RUN chmod +x /mesos-docker-executor/executor.py
 
 ENTRYPOINT ["/mesos-docker-executor/executor.py"]
