@@ -21,7 +21,8 @@ class DockerExecutor(mesos.interface.Executor):
       update.task_id.value = task.task_id.value
       ret = self.task_process.wait()
       update.message = "task finished, return value: %s" % ret
-      if ret == 0:
+      # ret code -15 means that the task is terminated manually
+      if ret == 0 or ret == -15:
         update.state = mesos_pb2.TASK_FINISHED
       elif ret == 9:
         update.state = mesos_pb2.TASK_KILLED
