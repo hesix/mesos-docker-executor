@@ -19,8 +19,8 @@ class DockerExecutor(mesos.interface.Executor):
       self.task_process = subprocess.Popen(command.split(' '))
       update = mesos_pb2.TaskStatus()
       update.task_id.value = task.task_id.value
-      update.message = "task finished, return value: %s" % ret
       ret = self.task_process.wait()
+      update.message = "task finished, return value: %s" % ret
       if ret == 0:
         update.state = mesos_pb2.TASK_FINISHED
       elif ret == 9:
