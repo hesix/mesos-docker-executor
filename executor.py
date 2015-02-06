@@ -43,8 +43,6 @@ class DockerExecutor(mesos.interface.Executor):
 
   def killTask(self, driver, task_id):
     print("kill task id: %s" % task_id.value)
-    status = mesos_pb2.TaskStatus(task_id, mesos_pb2.TASK_FINISHED, "")
-    driver.sendStatusUpdate(status)
     self.task_process.terminate()
 
   def frameworkMessage(self, driver, message):
