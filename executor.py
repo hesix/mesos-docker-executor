@@ -3,6 +3,7 @@
 __author__ = 'xiaotian.wu@chinacache.com'
 
 import os
+import subprocess
 import socket
 import sys
 import threading
@@ -15,11 +16,13 @@ class DockerExecutor(mesos.interface.Executor):
   def launchTask(self, driver, task):
     def run():
       command = task.data
-      ret = os.system(command)
+      self.task_process = subprocess.Popen(command.split(' '))
       update = mesos_pb2.TaskStatus()
       update.task_id.value = task.task_id.value
+      ret = self.task_process.wait()
       update.message = "task finished, return value: %s" % ret
-      if ret == 0:
+      # ret code -15 means that the task is terminated manually
+      if ret == 0 or ret == -15:
         update.state = mesos_pb2.TASK_FINISHED
       elif ret == 9:
         update.state = mesos_pb2.TASK_KILLED
@@ -29,6 +32,7 @@ class DockerExecutor(mesos.interface.Executor):
       driver.sendStatusUpdate(update)
       driver.stop()
 
+    self.task_id = task.task_id
     print("running task %s, command: %s" % (task.task_id.value, task.data))
     update = mesos_pb2.TaskStatus()
     update.task_id.value = task.task_id.value
@@ -37,6 +41,10 @@ class DockerExecutor(mesos.interface.Executor):
     print("task is running...")
     running_thread = threading.Thread(target = run)
     running_thread.start()
+
+  def killTask(self, driver, task_id):
+    print("kill task id: %s" % task_id.value)
+    self.task_process.terminate()
 
   def frameworkMessage(self, driver, message):
     driver.sendFrameworkMessage(message)
