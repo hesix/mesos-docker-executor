@@ -2,7 +2,7 @@ __author__ = "qiang.he@chinacache.com"
 
 import os
 
-from info import ContainerState
+from info.container import ContainerState
 
 class Collector:
   def __init__(self):
@@ -15,7 +15,7 @@ class Collector:
       if info.startswith("1:"):
         info_split = info.split("-")
         if len(info_split) == 2:
-          self.container_id = info_split[1][:-6]
+          self.container_id = info_split[1][:-7]
     return self.container_id
 
   def collect_info(self):
@@ -26,4 +26,6 @@ class Collector:
     return container_state.get_container_info()
 
         
-         
+if __name__ == "__main__":
+  collector = Collector()
+  print collector.collect_info()         

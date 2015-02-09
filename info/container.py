@@ -1,23 +1,26 @@
 __author__ = "qiang.he@chinacache.com"
 
 import os
+import json
 
 from json import *
+
 
 class ContainerState:
   def __init__(self, path):
     self.json_path = path + "/state.json"
-
+    self.container_state_list = {}
     if not os.path.exists(self.json_path):
-      logger.error("%s the file don't exist" % self.json_path)
+      # logger.error("%s the file don't exist" % self.json_path)
       self.container_state_list = {}
-    
-    self.container_state_json = open(json_path, 'r').read()
-    try:
-      eval(container_state_json)
-      self.container_state_list = JSONDecoder().decode(self.container_state_json)
-    except Exception, exception:
-      logger.warn(exception)
+    else:
+      container_state_json = open(self.json_path, 'r').read()
+      try:
+        eval(container_state_json)
+        self.container_state_list = JSONDecoder().decode(container_state_json)
+      except Exception, exception:
+        print exception
+        # logger.warn(exception)
 
   def get_container_init_pid(self):
     return "init_pid", self.container_state_list["init_pid"]
@@ -34,7 +37,7 @@ class ContainerState:
       cpu_stat_info = open(cpu_stat, 'r')
       cpu_stat_list = {}
       for line in cpu_stat_info:
-        info_split = line.split(' ')
+        info_split = line.strip('\n').split(' ')
         if len(info_split) == 2:
           cpu_stat_list[info_split[0]] = info_split[1]
       cpu_info["cpu.stat"] = cpu_stat_list
@@ -42,7 +45,7 @@ class ContainerState:
     cpu_shares = cgroup_info["cpu"] + "/cpu.shares"
     if os.path.exists(cpu_shares):
       cpu_shares_info = open(cpu_shares, 'r').read()
-      cpu_info["cpu.shares"] = cpu_shares_info
+      cpu_info["cpu.shares"] = cpu_shares_info.strip('\n')
 
     return "cpu", cpu_info
 
@@ -55,7 +58,7 @@ class ContainerState:
       cpuacct_stat_info = open(cpuacct_stat, 'r')
       cpuacct_stat_list = {}
       for info in cpuacct_stat_info:
-        info_split = info.split(' ')
+        info_split = info.strip('\n').split(' ')
         if len(info_split) == 2:
           cpuacct_stat_list[info_split[0]] = info_split[1]
         
@@ -64,12 +67,12 @@ class ContainerState:
     cpuacct_usage = cgroup_info["cpuacct"] + "/cpuacct.usage"
     if os.path.exists(cpuacct_usage):
       cpuacct_usage_info = open(cpuacct_usage, 'r').read()
-      cpuacct_info["cpuacct.usage"] = cpuacct_usage_info
+      cpuacct_info["cpuacct.usage"] = cpuacct_usage_info.strip("\n")
 
     cpuacct_usage_percpu = cgroup_info["cpuacct"] + "/cpuacct.usage_percpu"
     if os.path.exists(cpuacct_usage_percpu):
       cpuacct_usage_percpu_info = open(cpuacct_usage_percpu, 'r').read()
-      cpuacct_usage_percpu_set = cpuacct_usage_percpu_info.split(' ')
+      cpuacct_usage_percpu_set = cpuacct_usage_percpu_info.strip("\n").split(' ')
       cpuacct_info["cpuacct.usage_percpu"] = cpuacct_usage_percpu_set
 
     return "cpuacct", cpuacct_info
@@ -80,15 +83,15 @@ class ContainerState:
     
     cpuset_cpus = cgroup_info["cpuset"] + "/cpuset.cpus"
     if os.path.exists(cpuset_cpus):
-      cpuset_cpus_info = open(cpuset_cpus, 'r'),read()
-      cpuset_info["cpuset.cpus"] = cpuset_cpus_info
+      cpuset_cpus_info = open(cpuset_cpus, 'r').read()
+      cpuset_info["cpuset.cpus"] = cpuset_cpus_info.strip("\n")
 
     cpuset_mems = cgroup_info["cpuset"] + "/cpuset.mems"
     if os.path.exists(cpuset_mems):
       cpuset_mems_info = open(cpuset_mems, 'r').read()
-      cpuset_info["cpuset.mems"] = cpuset_mems_info
+      cpuset_info["cpuset.mems"] = cpuset_mems_info.strip("\n")
 
-    return "cpuset", cpuset
+    return "cpuset", cpuset_info
 
   def get_container_memory(self):
     memory_info = {}
@@ -98,14 +101,14 @@ class ContainerState:
                                 + "/memory.max_usage_in_bytes"
     if os.path.exists(memory_max_usage_in_bytes):
       memory_max_usage_in_bytes_info = open(memory_max_usage_in_bytes, 'r').read()
-      memory_info["memory.max_usage_in_bytes"] = memory_max_usage_in_bytes_info
+      memory_info["memory.max_usage_in_bytes"] = memory_max_usage_in_bytes_info.strip("\n")
    
     memory_stat = cgroup_info["memory"] + "/memory.stat"
     if os.path.exists(memory_stat):
       memory_stat_info = open(memory_stat, 'r')
       memory_stat_list = {}
       for line in memory_stat_info:
-        info_split = line.split(' ')
+        info_split = line.strip('\n').split(' ')
         if len(info_split) == 2:
           memory_stat_list[info_split[0]] = info_split[1]
       memory_info["memory.stat"] = memory_stat_list
@@ -133,5 +136,5 @@ class ContainerState:
     key, value = self.get_container_memory()
     container_info[key] = value
    
-    container_info_json = json.dump(container_info)
+    container_info_json = json.dumps(container_info, skipkeys=True)
     return container_info_json
