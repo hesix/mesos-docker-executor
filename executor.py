@@ -23,6 +23,7 @@ class DockerExecutor(mesos.interface.Executor):
         update.task_id.value = task.task_id.value
         collector = Collector() 
         update.message = collector.collect_info()
+        update.state = mesos_pb2.TASK_RUNNING
         print update.message
         driver.sendStatusUpdate(update)
         time.sleep(30)
