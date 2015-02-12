@@ -7,6 +7,7 @@ import subprocess
 import socket
 import sys
 import threading
+import time
 
 import mesos.native
 import mesos.interface
@@ -24,6 +25,7 @@ class DockerExecutor(mesos.interface.Executor):
         update.message = collector.collect_info()
         print update.message
         driver.sendStatusUpdate(update)
+        time.sleep(30)
         
     def run():
       command = task.data
