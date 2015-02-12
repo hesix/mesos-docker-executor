@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-__author__ = 'xiaotian.wu@chinacache.com'
+__author__ = 'xiaotian.wu@chinacache.com,qiang.he@chinacache.com'
 
 import os
 import subprocess
@@ -11,6 +11,7 @@ import time
 
 import mesos.native
 import mesos.interface
+from conf.config import logger
 from mesos.interface import mesos_pb2
 from utils.container_info_upload import Collector
 from multiprocessing import Process
@@ -24,7 +25,7 @@ class DockerExecutor(mesos.interface.Executor):
         collector = Collector() 
         update.message = collector.collect_info()
         update.state = mesos_pb2.TASK_RUNNING
-        print update.message
+        logger.debug(update.message)
         driver.sendStatusUpdate(update)
         time.sleep(30)
         
@@ -42,25 +43,27 @@ class DockerExecutor(mesos.interface.Executor):
         update.state = mesos_pb2.TASK_KILLED
       else:
         update.state = mesos_pb2.TASK_FAILED
-      print update.message
+      logger.debug(update.message)
       driver.sendStatusUpdate(update)
       driver.stop()
 
     self.task_id = task.task_id
-    print("running task %s, command: %s" % (task.task_id.value, task.data))
+    logger.info("running task %s, command: %s" % (task.task_id.value, task.data))
+    #print("running task %s, command: %s" % (task.task_id.value, task.data))
     update = mesos_pb2.TaskStatus()
     update.task_id.value = task.task_id.value
     update.state = mesos_pb2.TASK_RUNNING
     driver.sendStatusUpdate(update)
     child_proc = Process(target=collect_cpu_and_memory, args=())
     child_proc.start()
-    print "the cpu and memory collector start"
-    print("task is running...")
+    logger.info("task is running...")
+    #print("task is running...")
     running_thread = threading.Thread(target = run)
     running_thread.start()
 
   def killTask(self, driver, task_id):
-    print("kill task id: %s" % task_id.value)
+    logger.info("kill task id: %s" % task_id.value)
+    #print("kill task id: %s" % task_id.value)
     self.task_process.terminate()
 
   def frameworkMessage(self, driver, message):

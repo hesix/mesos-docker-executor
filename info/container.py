@@ -4,14 +4,14 @@ import os
 import json
 
 from json import *
-
+from conf.config import logger
 
 class ContainerState:
   def __init__(self, path):
     self.json_path = path + "/state.json"
     self.container_state_list = {}
     if not os.path.exists(self.json_path):
-      # logger.error("%s the file don't exist" % self.json_path)
+      logger.error("%s the file don't exist" % self.json_path)
       self.container_state_list = {}
     else:
       container_state_json = open(self.json_path, 'r').read()
@@ -20,7 +20,7 @@ class ContainerState:
         self.container_state_list = JSONDecoder().decode(container_state_json)
       except Exception, exception:
         print exception
-        # logger.warn(exception)
+        logger.warn(exception)
 
   def get_container_init_pid(self):
     return "init_pid", self.container_state_list["init_pid"]
