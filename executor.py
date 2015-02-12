@@ -50,7 +50,7 @@ class DockerExecutor(mesos.interface.Executor):
     update.task_id.value = task.task_id.value
     update.state = mesos_pb2.TASK_RUNNING
     driver.sendStatusUpdate(update)
-    child_proc = Process(collect_cpu_and_memory, args=())
+    child_proc = Process(target=collect_cpu_and_memory, args=())
     child_proc.start()
     print "the cpu and memory collector start"
     print("task is running...")
