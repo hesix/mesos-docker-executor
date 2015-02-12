@@ -20,7 +20,6 @@ class DockerExecutor(mesos.interface.Executor):
       while True:
         update = mesos_pb2.TaskStatus()
         update.task_id.value = task.task_id.value
-        ret = self.task_process.wait()
         collector = Collector() 
         update.message = collector.collect_info()
         print update.message
