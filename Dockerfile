@@ -20,6 +20,6 @@ RUN yum install -y subversion-devel
 
 ADD . /mesos-docker-executor
 RUN chmod +x /mesos-docker-executor/executor.py
-RUN export PYTHONPATH=/mesos-docker-executor
+ENV PYTHONPATH /mesos-docker-executor
 
 ENTRYPOINT ["/mesos-docker-executor/executor.py"]
