@@ -11,7 +11,7 @@ import time
 
 import mesos.native
 import mesos.interface
-from conf.config import logger
+from config import logger
 from mesos.interface import mesos_pb2
 from utils.container_info_upload import Collector
 from multiprocessing import Process

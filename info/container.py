@@ -4,7 +4,7 @@ import os
 import json
 
 from json import *
-from conf.config import logger
+from config import logger
 
 class ContainerState:
   def __init__(self, path):
