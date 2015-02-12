@@ -12,19 +12,19 @@ import mesos.native
 import mesos.interface
 from mesos.interface import mesos_pb2
 from utils.container_info_upload import Collector
-
+from multiprocessing import Process
 
 class DockerExecutor(mesos.interface.Executor):
   def launchTask(self, driver, task):
     def collect_cpu_and_memory():
       while True:
-      update = mesos_pb2.TaskStatus()
-      update.task_id.value = task.task_id.value
-      ret = self.task_process.wait()
-      collector = Collector() 
-      update.message = collector.collect_info()
-      print update.message
-      driver.sendStatusUpdate(update)
+        update = mesos_pb2.TaskStatus()
+        update.task_id.value = task.task_id.value
+        ret = self.task_process.wait()
+        collector = Collector() 
+        update.message = collector.collect_info()
+        print update.message
+        driver.sendStatusUpdate(update)
         
     def run():
       command = task.data
@@ -42,7 +42,6 @@ class DockerExecutor(mesos.interface.Executor):
         update.state = mesos_pb2.TASK_FAILED
       print update.message
       driver.sendStatusUpdate(update)
-      collect_cpu_and_memory()
       driver.stop()
 
     self.task_id = task.task_id
@@ -51,6 +50,9 @@ class DockerExecutor(mesos.interface.Executor):
     update.task_id.value = task.task_id.value
     update.state = mesos_pb2.TASK_RUNNING
     driver.sendStatusUpdate(update)
+    child_proc = Process(collect_cpu_and_memory, args=())
+    child_proc.start()
+    print "the cpu and memory collector start"
     print("task is running...")
     running_thread = threading.Thread(target = run)
     running_thread.start()
